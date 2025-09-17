@@ -375,12 +375,25 @@ async def initialize_sample_data():
         sections.append(section)
         await db.sections.insert_one(section.dict())
     
-    # Create categories
+    # Create categories with diverse products
     categories_data = [
-        {"name": "Fresh Fruits", "section_idx": 0},
-        {"name": "Snacks", "section_idx": 1},
-        {"name": "Soft Drinks", "section_idx": 2},
-        {"name": "Cleaning Supplies", "section_idx": 3}
+        {"name": "Fresh Fruits", "section_idx": 0},  # Produce
+        {"name": "Vegetables", "section_idx": 0},     # Produce
+        {"name": "Soft Drinks", "section_idx": 1},    # Beverages
+        {"name": "Juices", "section_idx": 1},         # Beverages
+        {"name": "Chips & Crackers", "section_idx": 2}, # Snacks
+        {"name": "Nuts & Candy", "section_idx": 2},   # Snacks
+        {"name": "Breakfast Cereals", "section_idx": 3}, # Cereal
+        {"name": "Canned Soup", "section_idx": 4},    # Canned
+        {"name": "Pasta", "section_idx": 5},          # Pasta
+        {"name": "Baking Essentials", "section_idx": 6}, # Baking
+        {"name": "Personal Care", "section_idx": 7},  # Health
+        {"name": "Cleaning Supplies", "section_idx": 8}, # Household
+        {"name": "Pet Food", "section_idx": 9},       # Pet
+        {"name": "Fresh Bread", "section_idx": 10},   # Bakery
+        {"name": "Deli Meats", "section_idx": 11},    # Deli
+        {"name": "Milk & Cheese", "section_idx": 12}, # Dairy
+        {"name": "Ice Cream", "section_idx": 13}      # Frozen
     ]
     
     categories = []
