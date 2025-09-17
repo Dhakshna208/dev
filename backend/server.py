@@ -408,25 +408,69 @@ async def initialize_sample_data():
         categories.append(category)
         await db.categories.insert_one(category.dict())
     
-    # Create sample products
+    # Create diverse sample products for complex store
     products_data = [
-        # Fruits
+        # Fresh Produce
         {"name": "Fresh Apples", "price": 2.99, "category_idx": 0, "description": "Crispy red apples"},
         {"name": "Bananas", "price": 1.49, "category_idx": 0, "description": "Fresh yellow bananas"},
-        {"name": "Orange Juice", "price": 3.49, "category_idx": 0, "description": "Fresh squeezed orange juice"},
+        {"name": "Carrots", "price": 1.89, "category_idx": 1, "description": "Fresh organic carrots"},
+        {"name": "Spinach", "price": 2.49, "category_idx": 1, "description": "Fresh baby spinach"},
         
-        # Snacks
-        {"name": "Potato Chips", "price": 2.49, "category_idx": 1, "description": "Crispy salted chips"},
-        {"name": "Chocolate Cookies", "price": 3.99, "category_idx": 1, "description": "Double chocolate chip cookies"},
-        {"name": "Mixed Nuts", "price": 5.99, "category_idx": 1, "description": "Roasted mixed nuts"},
-        
-        # Beverages
+        # Beverages  
         {"name": "Coca Cola", "price": 1.99, "category_idx": 2, "description": "Classic cola drink"},
         {"name": "Bottled Water", "price": 0.99, "category_idx": 2, "description": "Pure spring water"},
+        {"name": "Orange Juice", "price": 3.49, "category_idx": 3, "description": "Fresh squeezed orange juice"},
+        {"name": "Apple Juice", "price": 2.99, "category_idx": 3, "description": "100% apple juice"},
         
-        # Household
-        {"name": "Dish Soap", "price": 4.49, "category_idx": 3, "description": "Lemon scented dish soap"},
-        {"name": "Paper Towels", "price": 6.99, "category_idx": 3, "description": "Absorbent paper towels"}
+        # Snacks
+        {"name": "Potato Chips", "price": 2.49, "category_idx": 4, "description": "Crispy salted chips"},
+        {"name": "Chocolate Cookies", "price": 3.99, "category_idx": 4, "description": "Double chocolate chip cookies"},
+        {"name": "Mixed Nuts", "price": 5.99, "category_idx": 5, "description": "Roasted mixed nuts"},
+        {"name": "Gummy Bears", "price": 1.79, "category_idx": 5, "description": "Fruity gummy candy"},
+        
+        # Cereal & Breakfast
+        {"name": "Corn Flakes", "price": 4.29, "category_idx": 6, "description": "Classic breakfast cereal"},
+        {"name": "Granola", "price": 5.49, "category_idx": 6, "description": "Honey oat granola"},
+        
+        # Canned Goods
+        {"name": "Chicken Soup", "price": 1.89, "category_idx": 7, "description": "Campbell's chicken noodle soup"},
+        {"name": "Tomato Sauce", "price": 1.29, "category_idx": 7, "description": "Organic tomato sauce"},
+        
+        # Pasta & International
+        {"name": "Spaghetti", "price": 1.99, "category_idx": 8, "description": "Italian spaghetti pasta"},
+        {"name": "Ramen Noodles", "price": 0.89, "category_idx": 8, "description": "Instant ramen"},
+        
+        # Baking & Spices
+        {"name": "All-Purpose Flour", "price": 2.49, "category_idx": 9, "description": "5lb bag of flour"},
+        {"name": "Vanilla Extract", "price": 4.99, "category_idx": 9, "description": "Pure vanilla extract"},
+        
+        # Health & Beauty
+        {"name": "Shampoo", "price": 6.99, "category_idx": 10, "description": "Moisturizing shampoo"},
+        {"name": "Toothpaste", "price": 3.49, "category_idx": 10, "description": "Whitening toothpaste"},
+        
+        # Household & Cleaning
+        {"name": "Dish Soap", "price": 4.49, "category_idx": 11, "description": "Lemon scented dish soap"},
+        {"name": "Paper Towels", "price": 6.99, "category_idx": 11, "description": "Absorbent paper towels"},
+        
+        # Pet Supplies
+        {"name": "Dog Food", "price": 12.99, "category_idx": 12, "description": "Premium dry dog food"},
+        {"name": "Cat Treats", "price": 3.99, "category_idx": 12, "description": "Salmon flavored treats"},
+        
+        # Fresh Bakery
+        {"name": "Sourdough Bread", "price": 3.99, "category_idx": 13, "description": "Fresh baked sourdough"},
+        {"name": "Blueberry Muffins", "price": 4.99, "category_idx": 13, "description": "Pack of 6 muffins"},
+        
+        # Deli & Meats
+        {"name": "Sliced Turkey", "price": 7.99, "category_idx": 14, "description": "Fresh sliced turkey breast"},
+        {"name": "Ham", "price": 6.99, "category_idx": 14, "description": "Honey glazed ham"},
+        
+        # Dairy
+        {"name": "Whole Milk", "price": 3.49, "category_idx": 15, "description": "1 gallon whole milk"},
+        {"name": "Cheddar Cheese", "price": 4.99, "category_idx": 15, "description": "Sharp cheddar cheese"},
+        
+        # Frozen Foods
+        {"name": "Ice Cream", "price": 5.99, "category_idx": 16, "description": "Vanilla ice cream"},
+        {"name": "Frozen Pizza", "price": 4.49, "category_idx": 16, "description": "Pepperoni pizza"}
     ]
     
     for product_data in products_data:
