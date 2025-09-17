@@ -369,6 +369,13 @@ const StorePage = () => {
     return acc;
   }, {});
 
+  // Calculate optimal path for navigation
+  const uncollectedItems = shoppingList.filter(item => !item.collected);
+  const optimizedPath = calculateOptimalPath(uncollectedItems);
+  const currentSectionData = optimizedPath[currentStep];
+  const nextSectionData = optimizedPath[currentStep + 1];
+  const directions = generateDirections(currentSectionData, nextSectionData);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
       {/* Header */}
@@ -379,9 +386,15 @@ const StorePage = () => {
               <h1 className="text-2xl font-bold text-gray-800">{storeData.store.name}</h1>
               <p className="text-gray-600">{storeData.store.address}</p>
             </div>
-            <Button asChild variant="outline">
-              <a href="/">← Back to Stores</a>
-            </Button>
+            <div className="flex gap-2">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <ShoppingCart className="h-4 w-4" />
+                {shoppingList.length} items
+              </Badge>
+              <Button asChild variant="outline">
+                <a href="/">← Back to Stores</a>
+              </Button>
+            </div>
           </div>
           
           {/* Search Bar */}
@@ -405,19 +418,33 @@ const StorePage = () => {
                   <div
                     key={product.id}
                     className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                    onClick={() => {
-                      handleProductClick(product);
-                      setSearchQuery("");
-                      setSearchResults([]);
-                    }}
                   >
                     <div className="flex justify-between items-center">
-                      <div>
+                      <div
+                        onClick={() => {
+                          handleProductClick(product);
+                          setSearchQuery("");
+                          setSearchResults([]);
+                        }}
+                        className="flex-1"
+                      >
                         <h4 className="font-medium">{product.name}</h4>
                         <p className="text-sm text-gray-600">{product.description}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="flex items-center gap-2">
                         <p className="font-semibold text-emerald-600">${product.price}</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToShoppingList(product);
+                            setSearchQuery("");
+                            setSearchResults([]);
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -427,6 +454,66 @@ const StorePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Shopping Navigation */}
+      {showDirections && optimizedPath.length > 0 && (
+        <div className="bg-blue-600 text-white px-4 py-3">
+          <div className="container mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  {React.createElement(directions.icon || ArrowUp, { className: "h-6 w-6" })}
+                  <span className="font-medium">{directions.instruction}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Step {currentStep + 1} of {optimizedPath.length}</span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={prevStep}
+                  disabled={currentStep === 0}
+                >
+                  ← Back
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={nextStep}
+                >
+                  {currentStep === optimizedPath.length - 1 ? 'Finish' : 'Next →'}
+                </Button>
+              </div>
+            </div>
+            
+            {/* Current Section Products */}
+            {currentSectionData && (
+              <div className="mt-3 p-3 bg-blue-700 rounded-lg">
+                <h4 className="font-medium mb-2">Items in {currentSectionData.name}:</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {currentSectionData.products.map((product) => (
+                    <div
+                      key={product.id}
+                      className={`flex items-center justify-between p-2 rounded ${
+                        product.collected ? 'bg-green-600' : 'bg-blue-600'
+                      }`}
+                    >
+                      <span className="text-sm">{product.name}</span>
+                      <Button
+                        size="sm"
+                        variant={product.collected ? "secondary" : "outline"}
+                        onClick={() => toggleProductCollected(product.id)}
+                      >
+                        {product.collected ? <Check className="h-4 w-4" /> : 'Collect'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-6">
         <div className="grid lg:grid-cols-3 gap-6">
@@ -438,11 +525,19 @@ const StorePage = () => {
                   <MapPin className="h-5 w-5" />
                   Store Map
                 </CardTitle>
-                {selectedProduct && (
-                  <Button onClick={resetHighlight} variant="outline" size="sm">
-                    Clear Selection
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {selectedProduct && !showDirections && (
+                    <Button onClick={resetHighlight} variant="outline" size="sm">
+                      Clear Selection
+                    </Button>
+                  )}
+                  {shoppingList.length > 0 && !showDirections && (
+                    <Button onClick={startShopping} className="bg-blue-600 hover:bg-blue-700">
+                      <Navigation className="h-4 w-4 mr-2" />
+                      Start Shopping
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div 
@@ -451,7 +546,7 @@ const StorePage = () => {
                   dangerouslySetInnerHTML={{ __html: storeData.store.layout_svg }}
                 />
                 
-                {selectedProduct && (
+                {selectedProduct && !showDirections && (
                   <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <h4 className="font-semibold text-yellow-800">Selected Product</h4>
                     <p className="text-yellow-700">
@@ -464,8 +559,50 @@ const StorePage = () => {
             </Card>
           </div>
 
-          {/* Product Categories */}
-          <div>
+          {/* Shopping List & Product Categories */}
+          <div className="space-y-4">
+            {/* Shopping List */}
+            {shoppingList.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5" />
+                    Shopping List ({shoppingList.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {shoppingList.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`flex items-center justify-between p-2 rounded-lg border ${
+                        item.collected 
+                          ? 'bg-green-50 border-green-200 text-green-800' 
+                          : 'bg-white border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {item.collected && <Check className="h-4 w-4 text-green-600" />}
+                        <div>
+                          <p className={`font-medium text-sm ${item.collected ? 'line-through' : ''}`}>
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-500">${item.price}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeFromShoppingList(item.id)}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Product Categories */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -485,27 +622,50 @@ const StorePage = () => {
                     </div>
                     
                     <div className="space-y-2 ml-6">
-                      {products.map((product) => (
-                        <div
-                          key={product.id}
-                          className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
-                            selectedProduct?.id === product.id
-                              ? 'bg-yellow-50 border-yellow-300 shadow-md'
-                              : 'hover:bg-gray-50 border-gray-200'
-                          }`}
-                          onClick={() => handleProductClick(product)}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <h4 className="font-medium text-sm">{product.name}</h4>
-                              <p className="text-xs text-gray-600 mt-1">{product.description}</p>
+                      {products.map((product) => {
+                        const inShoppingList = shoppingList.find(item => item.id === product.id);
+                        return (
+                          <div
+                            key={product.id}
+                            className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
+                              selectedProduct?.id === product.id
+                                ? 'bg-yellow-50 border-yellow-300 shadow-md'
+                                : inShoppingList
+                                  ? 'bg-emerald-50 border-emerald-200'
+                                  : 'hover:bg-gray-50 border-gray-200'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div
+                                className="flex-1"
+                                onClick={() => handleProductClick(product)}
+                              >
+                                <h4 className="font-medium text-sm">{product.name}</h4>
+                                <p className="text-xs text-gray-600 mt-1">{product.description}</p>
+                              </div>
+                              <div className="flex items-center gap-2 ml-2">
+                                <Badge variant="secondary" className="text-emerald-600">
+                                  ${product.price}
+                                </Badge>
+                                <Button
+                                  size="sm"
+                                  variant={inShoppingList ? "destructive" : "outline"}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (inShoppingList) {
+                                      removeFromShoppingList(product.id);
+                                    } else {
+                                      addToShoppingList(product);
+                                    }
+                                  }}
+                                >
+                                  {inShoppingList ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                                </Button>
+                              </div>
                             </div>
-                            <Badge variant="secondary" className="ml-2 text-emerald-600">
-                              ${product.price}
-                            </Badge>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
