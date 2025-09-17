@@ -154,37 +154,151 @@ const StorePage = () => {
     }
   };
 
-  const handleProductClick = (product) => {
-    setSelectedProduct(product);
+  // Calculate optimal shopping path
+  const calculateOptimalPath = (products) => {
+    if (products.length === 0) return [];
     
-    // Find the section for this product
-    const section = storeData.sections.find(s => s.id === product.section_id);
-    if (section) {
-      setHighlightedSection(section.svg_element_id);
+    // Define section positions (based on our SVG layout)
+    const sectionPositions = {
+      'fruits-section': { x: 200, y: 150, name: 'FRUITS & VEGETABLES' },
+      'snacks-section': { x: 600, y: 150, name: 'SNACKS & CHIPS' },
+      'beverages-section': { x: 200, y: 400, name: 'BEVERAGES' },
+      'household-section': { x: 600, y: 400, name: 'HOUSEHOLD ITEMS' }
+    };
+    
+    // Get unique sections for products
+    const sectionsNeeded = [...new Set(products.map(p => p.section_id))];
+    const sectionDetails = sectionsNeeded.map(sectionId => {
+      const section = storeData.sections.find(s => s.id === sectionId);
+      const position = sectionPositions[section.svg_element_id];
+      return {
+        ...section,
+        ...position,
+        products: products.filter(p => p.section_id === sectionId)
+      };
+    });
+    
+    // Simple path optimization - start from entrance (bottom) and minimize distance
+    const entrance = { x: 400, y: 575 };
+    let optimizedPath = [];
+    let currentPosition = entrance;
+    let remainingSections = [...sectionDetails];
+    
+    while (remainingSections.length > 0) {
+      // Find nearest section
+      let nearestSection = remainingSections[0];
+      let minDistance = Math.sqrt(Math.pow(currentPosition.x - nearestSection.x, 2) + Math.pow(currentPosition.y - nearestSection.y, 2));
       
-      // Highlight the section in the SVG
-      const svgElement = document.getElementById(section.svg_element_id);
-      if (svgElement) {
-        // Reset all sections first
-        storeData.sections.forEach(s => {
-          const el = document.getElementById(s.svg_element_id);
-          if (el) {
-            el.style.fill = s.color;
-            el.style.opacity = "0.7";
-            el.style.stroke = s.color;
-            el.style.strokeWidth = "3";
-          }
-        });
-        
-        // Highlight selected section
-        svgElement.style.fill = "#ffeb3b";
-        svgElement.style.opacity = "0.9";
-        svgElement.style.stroke = "#f57f17";
-        svgElement.style.strokeWidth = "4";
-        svgElement.style.filter = "drop-shadow(0 4px 8px rgba(0,0,0,0.3))";
-        
-        // Scroll to the map
-        document.getElementById('store-map')?.scrollIntoView({ behavior: 'smooth' });
+      for (let section of remainingSections) {
+        const distance = Math.sqrt(Math.pow(currentPosition.x - section.x, 2) + Math.pow(currentPosition.y - section.y, 2));
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestSection = section;
+        }
+      }
+      
+      optimizedPath.push(nearestSection);
+      currentPosition = { x: nearestSection.x, y: nearestSection.y };
+      remainingSections = remainingSections.filter(s => s.id !== nearestSection.id);
+    }
+    
+    return optimizedPath;
+  };
+  
+  // Generate directions between sections
+  const generateDirections = (fromSection, toSection) => {
+    if (!fromSection || !toSection) return { direction: 'straight', instruction: 'Continue straight' };
+    
+    const deltaX = toSection.x - fromSection.x;
+    const deltaY = toSection.y - fromSection.y;
+    
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        return { direction: 'right', instruction: `Turn right towards ${toSection.name}`, icon: ArrowRight };
+      } else {
+        return { direction: 'left', instruction: `Turn left towards ${toSection.name}`, icon: ArrowLeft };
+      }
+    } else {
+      if (deltaY < 0) {
+        return { direction: 'straight', instruction: `Go straight to ${toSection.name}`, icon: ArrowUp };
+      } else {
+        return { direction: 'straight', instruction: `Continue to ${toSection.name}`, icon: ArrowUp };
+      }
+    }
+  };
+
+  const addToShoppingList = (product) => {
+    if (!shoppingList.find(item => item.id === product.id)) {
+      setShoppingList([...shoppingList, { ...product, collected: false }]);
+    }
+  };
+
+  const removeFromShoppingList = (productId) => {
+    setShoppingList(shoppingList.filter(item => item.id !== productId));
+  };
+
+  const toggleProductCollected = (productId) => {
+    setShoppingList(shoppingList.map(item => 
+      item.id === productId ? { ...item, collected: !item.collected } : item
+    ));
+  };
+
+  const startShopping = () => {
+    if (shoppingList.length > 0) {
+      setShowDirections(true);
+      setCurrentStep(0);
+      // Highlight first section
+      const path = calculateOptimalPath(shoppingList);
+      if (path.length > 0) {
+        highlightSection(path[0].svg_element_id);
+      }
+    }
+  };
+
+  const nextStep = () => {
+    const path = calculateOptimalPath(shoppingList.filter(item => !item.collected));
+    if (currentStep < path.length - 1) {
+      setCurrentStep(currentStep + 1);
+      highlightSection(path[currentStep + 1].svg_element_id);
+    } else {
+      setShowDirections(false);
+      setCurrentStep(0);
+      resetHighlight();
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      const path = calculateOptimalPath(shoppingList.filter(item => !item.collected));
+      setCurrentStep(currentStep - 1);
+      highlightSection(path[currentStep - 1].svg_element_id);
+    }
+  };
+
+  const highlightSection = (sectionId) => {
+    setHighlightedSection(sectionId);
+    
+    // Reset all sections first
+    if (storeData) {
+      storeData.sections.forEach(s => {
+        const el = document.getElementById(s.svg_element_id);
+        if (el) {
+          el.style.fill = s.color;
+          el.style.opacity = "0.7";
+          el.style.stroke = s.color;
+          el.style.strokeWidth = "3";
+          el.style.filter = "none";
+        }
+      });
+      
+      // Highlight selected section
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.style.fill = "#ffeb3b";
+        element.style.opacity = "0.9";
+        element.style.stroke = "#f57f17";
+        element.style.strokeWidth = "4";
+        element.style.filter = "drop-shadow(0 4px 8px rgba(0,0,0,0.3))";
       }
     }
   };
