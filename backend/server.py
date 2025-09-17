@@ -346,12 +346,22 @@ async def initialize_sample_data():
     store_mongo = prepare_for_mongo(store.dict())
     await db.stores.insert_one(store_mongo)
     
-    # Create sections
+    # Create sections for complex layout
     sections_data = [
-        {"name": "Fruits & Vegetables", "color": "#28a745", "svg_element_id": "fruits-section"},
+        {"name": "Fresh Produce", "color": "#28a745", "svg_element_id": "produce-section"},
+        {"name": "Beverages", "color": "#17a2b8", "svg_element_id": "beverages-section"},
         {"name": "Snacks & Chips", "color": "#fd7e14", "svg_element_id": "snacks-section"},
-        {"name": "Beverages", "color": "#007bff", "svg_element_id": "beverages-section"},
-        {"name": "Household Items", "color": "#6f42c1", "svg_element_id": "household-section"}
+        {"name": "Cereal & Breakfast", "color": "#ffc107", "svg_element_id": "cereal-section"},
+        {"name": "Canned Goods", "color": "#6c757d", "svg_element_id": "canned-section"},
+        {"name": "Pasta & International", "color": "#e83e8c", "svg_element_id": "pasta-section"},
+        {"name": "Baking & Spices", "color": "#20c997", "svg_element_id": "baking-section"},
+        {"name": "Health & Beauty", "color": "#6f42c1", "svg_element_id": "health-section"},
+        {"name": "Household & Cleaning", "color": "#dc3545", "svg_element_id": "household-section"},
+        {"name": "Pet Supplies", "color": "#795548", "svg_element_id": "pet-section"},
+        {"name": "Fresh Bakery", "color": "#fd7e14", "svg_element_id": "bakery-section"},
+        {"name": "Deli & Meats", "color": "#dc3545", "svg_element_id": "deli-section"},
+        {"name": "Dairy", "color": "#6f42c1", "svg_element_id": "dairy-section"},
+        {"name": "Frozen Foods", "color": "#007bff", "svg_element_id": "frozen-section"}
     ]
     
     sections = []
