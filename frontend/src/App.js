@@ -117,6 +117,9 @@ const StorePage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [highlightedSection, setHighlightedSection] = useState(null);
+  const [shoppingList, setShoppingList] = useState([]);
+  const [showDirections, setShowDirections] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
