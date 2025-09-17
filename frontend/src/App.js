@@ -315,6 +315,8 @@ const StorePage = () => {
       document.getElementById('store-map')?.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const resetHighlight = () => {
     setSelectedProduct(null);
     setHighlightedSection(null);
     
