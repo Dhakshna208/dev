@@ -154,16 +154,26 @@ const StorePage = () => {
     }
   };
 
-  // Calculate optimal shopping path
+  // Calculate optimal shopping path for complex store layout
   const calculateOptimalPath = (products) => {
     if (products.length === 0) return [];
     
-    // Define section positions (based on our SVG layout)
+    // Define section positions for complex store layout (based on new SVG)
     const sectionPositions = {
-      'fruits-section': { x: 200, y: 150, name: 'FRUITS & VEGETABLES' },
-      'snacks-section': { x: 600, y: 150, name: 'SNACKS & CHIPS' },
-      'beverages-section': { x: 200, y: 400, name: 'BEVERAGES' },
-      'household-section': { x: 600, y: 400, name: 'HOUSEHOLD ITEMS' }
+      'produce-section': { x: 225, y: 560, name: 'FRESH PRODUCE', aisle: 'Front Left', landmark: 'near Bakery' },
+      'beverages-section': { x: 375, y: 440, name: 'BEVERAGES', aisle: 'Aisle 1', landmark: 'center store' },
+      'snacks-section': { x: 555, y: 440, name: 'SNACKS & CHIPS', aisle: 'Aisle 2', landmark: 'next to Cereal' },
+      'cereal-section': { x: 735, y: 440, name: 'CEREAL & BREAKFAST', aisle: 'Aisle 3', landmark: 'center-right' },
+      'canned-section': { x: 375, y: 290, name: 'CANNED GOODS', aisle: 'Aisle 4', landmark: 'back area' },
+      'pasta-section': { x: 555, y: 290, name: 'PASTA & INTERNATIONAL', aisle: 'Aisle 5', landmark: 'middle back' },
+      'baking-section': { x: 735, y: 290, name: 'BAKING & SPICES', aisle: 'Aisle 6', landmark: 'back right' },
+      'health-section': { x: 375, y: 140, name: 'HEALTH & BEAUTY', aisle: 'Aisle 7', landmark: 'far back left' },
+      'household-section': { x: 555, y: 140, name: 'HOUSEHOLD & CLEANING', aisle: 'Aisle 8', landmark: 'far back center' },
+      'pet-section': { x: 735, y: 140, name: 'PET SUPPLIES', aisle: 'Back Right', landmark: 'far back corner' },
+      'bakery-section': { x: 450, y: 690, name: 'FRESH BAKERY', aisle: 'Front', landmark: 'left of entrance' },
+      'deli-section': { x: 975, y: 560, name: 'DELI & MEATS', aisle: 'Front Right', landmark: 'service counter' },
+      'dairy-section': { x: 1050, y: 375, name: 'DAIRY', aisle: 'Right Wall', landmark: 'refrigerated section' },
+      'frozen-section': { x: 150, y: 375, name: 'FROZEN FOODS', aisle: 'Left Wall', landmark: 'freezer section' }
     };
     
     // Get unique sections for products
@@ -178,53 +188,125 @@ const StorePage = () => {
       };
     });
     
-    // Simple path optimization - start from entrance (bottom) and minimize distance
-    const entrance = { x: 400, y: 575 };
+    // Enhanced path optimization starting from entrance
+    const entrance = { x: 600, y: 775, name: 'ENTRANCE' };
     let optimizedPath = [];
     let currentPosition = entrance;
     let remainingSections = [...sectionDetails];
     
+    // Prioritize sections based on store layout logic
+    const sectionPriority = {
+      'bakery-section': 1,      // Front left - easy first stop
+      'produce-section': 2,     // Front produce area
+      'deli-section': 3,        // Front right service counter
+      'beverages-section': 4,   // Aisle 1 - center store
+      'snacks-section': 5,      // Aisle 2 
+      'cereal-section': 6,      // Aisle 3
+      'canned-section': 7,      // Aisle 4 - back area
+      'pasta-section': 8,       // Aisle 5
+      'baking-section': 9,      // Aisle 6
+      'frozen-section': 10,     // Left wall - frozen
+      'dairy-section': 11,      // Right wall - dairy
+      'health-section': 12,     // Aisle 7 - far back
+      'household-section': 13,  // Aisle 8 - far back
+      'pet-section': 14         // Far back corner - last
+    };
+    
+    // Sort sections by priority and distance
     while (remainingSections.length > 0) {
-      // Find nearest section
-      let nearestSection = remainingSections[0];
-      let minDistance = Math.sqrt(Math.pow(currentPosition.x - nearestSection.x, 2) + Math.pow(currentPosition.y - nearestSection.y, 2));
-      
-      for (let section of remainingSections) {
-        const distance = Math.sqrt(Math.pow(currentPosition.x - section.x, 2) + Math.pow(currentPosition.y - section.y, 2));
-        if (distance < minDistance) {
-          minDistance = distance;
-          nearestSection = section;
+      remainingSections.sort((a, b) => {
+        const priorityA = sectionPriority[a.svg_element_id] || 99;
+        const priorityB = sectionPriority[b.svg_element_id] || 99;
+        
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
         }
-      }
+        
+        // If same priority, choose by distance
+        const distA = Math.sqrt(Math.pow(currentPosition.x - a.x, 2) + Math.pow(currentPosition.y - a.y, 2));
+        const distB = Math.sqrt(Math.pow(currentPosition.x - b.x, 2) + Math.pow(currentPosition.y - b.y, 2));
+        return distA - distB;
+      });
       
-      optimizedPath.push(nearestSection);
-      currentPosition = { x: nearestSection.x, y: nearestSection.y };
-      remainingSections = remainingSections.filter(s => s.id !== nearestSection.id);
+      const nextSection = remainingSections[0];
+      optimizedPath.push(nextSection);
+      currentPosition = { x: nextSection.x, y: nextSection.y };
+      remainingSections = remainingSections.filter(s => s.id !== nextSection.id);
     }
     
     return optimizedPath;
   };
   
-  // Generate directions between sections
-  const generateDirections = (fromSection, toSection) => {
-    if (!fromSection || !toSection) return { direction: 'straight', instruction: 'Continue straight' };
+  // Enhanced direction generation for complex store
+  const generateDirections = (fromSection, toSection, stepNumber, totalSteps) => {
+    if (!toSection) return { direction: 'finish', instruction: 'Shopping complete!', icon: Check };
     
+    // Entrance to first section
+    if (!fromSection) {
+      const entranceInstructions = {
+        'bakery-section': { direction: 'left', instruction: 'Walk straight from entrance, then turn LEFT to Fresh Bakery', icon: ArrowLeft },
+        'produce-section': { direction: 'left', instruction: 'Walk straight ahead to Fresh Produce section on your LEFT', icon: ArrowLeft },
+        'deli-section': { direction: 'right', instruction: 'Walk straight from entrance, then turn RIGHT to Deli & Meats', icon: ArrowRight },
+        'beverages-section': { direction: 'straight', instruction: 'Walk straight ahead to Aisle 1 - Beverages in center store', icon: ArrowUp },
+        'snacks-section': { direction: 'straight', instruction: 'Walk straight ahead to Aisle 2 - Snacks & Chips', icon: ArrowUp }
+      };
+      
+      return entranceInstructions[toSection.svg_element_id] || 
+             { direction: 'straight', instruction: `Walk straight ahead to ${toSection.name}`, icon: ArrowUp };
+    }
+    
+    // Calculate direction based on position changes
     const deltaX = toSection.x - fromSection.x;
     const deltaY = toSection.y - fromSection.y;
     
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 0) {
-        return { direction: 'right', instruction: `Turn right towards ${toSection.name}`, icon: ArrowRight };
-      } else {
-        return { direction: 'left', instruction: `Turn left towards ${toSection.name}`, icon: ArrowLeft };
+    // Generate contextual instructions based on store layout
+    const generateContextualInstruction = () => {
+      // Moving between aisles
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 100) {
+          return `Turn RIGHT and walk to ${toSection.aisle} - ${toSection.name}`;
+        } else if (deltaX < -100) {
+          return `Turn LEFT and walk to ${toSection.aisle} - ${toSection.name}`;
+        }
       }
-    } else {
-      if (deltaY < 0) {
-        return { direction: 'straight', instruction: `Go straight to ${toSection.name}`, icon: ArrowUp };
-      } else {
-        return { direction: 'straight', instruction: `Continue to ${toSection.name}`, icon: ArrowUp };
+      
+      // Moving forward/backward in store
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        if (deltaY > 100) {
+          return `Walk toward the FRONT of the store to ${toSection.name}`;
+        } else if (deltaY < -100) {
+          return `Walk toward the BACK of the store to ${toSection.aisle} - ${toSection.name}`;
+        }
       }
-    }
+      
+      // Specific section instructions
+      const specificInstructions = {
+        'dairy-section': 'Walk to the RIGHT WALL - Dairy section (refrigerated area)',
+        'frozen-section': 'Walk to the LEFT WALL - Frozen Foods section (freezer area)',
+        'pet-section': 'Walk to the FAR BACK RIGHT CORNER - Pet Supplies',
+        'health-section': 'Walk to the FAR BACK - Aisle 7 Health & Beauty',
+        'household-section': 'Continue to Aisle 8 - Household & Cleaning supplies'
+      };
+      
+      return specificInstructions[toSection.svg_element_id] || 
+             `Continue to ${toSection.aisle} - ${toSection.name}`;
+    };
+    
+    const instruction = generateContextualInstruction();
+    
+    // Determine icon based on movement
+    let icon = ArrowUp;
+    if (deltaX > 50) icon = ArrowRight;
+    else if (deltaX < -50) icon = ArrowLeft;
+    else if (deltaY > 50) icon = ArrowUp;
+    
+    return {
+      direction: deltaX > 0 ? 'right' : deltaX < 0 ? 'left' : 'straight',
+      instruction: instruction,
+      icon: icon,
+      landmark: toSection.landmark,
+      aisle: toSection.aisle
+    };
   };
 
   const addToShoppingList = (product) => {
