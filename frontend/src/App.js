@@ -303,7 +303,18 @@ const StorePage = () => {
     }
   };
 
-  const resetHighlight = () => {
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    
+    // Find the section for this product
+    const section = storeData.sections.find(s => s.id === product.section_id);
+    if (section) {
+      highlightSection(section.svg_element_id);
+      
+      // Scroll to the map
+      document.getElementById('store-map')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
     setSelectedProduct(null);
     setHighlightedSection(null);
     
