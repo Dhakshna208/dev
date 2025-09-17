@@ -219,34 +219,122 @@ async def initialize_sample_data():
     await db.categories.delete_many({})
     await db.products.delete_many({})
     
-    # Sample SVG for supermarket layout
-    sample_svg = '''<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+    # Sample SVG for complex supermarket layout
+    sample_svg = '''<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
         <!-- Store Background -->
-        <rect width="800" height="600" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+        <rect width="1200" height="800" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
         
-        <!-- Entrance -->
-        <rect x="350" y="550" width="100" height="50" fill="#6c757d" />
-        <text x="400" y="575" text-anchor="middle" fill="white" font-size="12">ENTRANCE</text>
+        <!-- Entrance Area -->
+        <rect x="550" y="750" width="100" height="50" fill="#6c757d" />
+        <text x="600" y="775" text-anchor="middle" fill="white" font-size="14" font-weight="bold">ENTRANCE</text>
         
-        <!-- Fruits Section -->
-        <rect id="fruits-section" x="50" y="50" width="300" height="200" fill="#28a745" opacity="0.7" stroke="#20c997" stroke-width="3" rx="10"/>
-        <text x="200" y="160" text-anchor="middle" fill="white" font-size="18" font-weight="bold">FRUITS & VEGETABLES</text>
+        <!-- Main Entrance Aisle (Vertical) -->
+        <rect x="580" y="650" width="40" height="100" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        <text x="600" y="700" text-anchor="middle" fill="#6c757d" font-size="10" transform="rotate(-90, 600, 700)">MAIN ENTRANCE</text>
         
-        <!-- Snacks Section -->
-        <rect id="snacks-section" x="450" y="50" width="300" height="200" fill="#fd7e14" opacity="0.7" stroke="#f8ac59" stroke-width="3" rx="10"/>
-        <text x="600" y="160" text-anchor="middle" fill="white" font-size="18" font-weight="bold">SNACKS & CHIPS</text>
+        <!-- Customer Service & Pharmacy (Front Right) -->
+        <rect id="service-section" x="650" y="650" width="200" height="80" fill="#17a2b8" opacity="0.7" stroke="#117a8b" stroke-width="3" rx="5"/>
+        <text x="750" y="695" text-anchor="middle" fill="white" font-size="12" font-weight="bold">CUSTOMER SERVICE</text>
         
-        <!-- Beverages Section -->
-        <rect id="beverages-section" x="50" y="300" width="300" height="200" fill="#007bff" opacity="0.7" stroke="#17a2b8" stroke-width="3" rx="10"/>
-        <text x="200" y="410" text-anchor="middle" fill="white" font-size="18" font-weight="bold">BEVERAGES</text>
+        <!-- Bakery (Front Left) -->
+        <rect id="bakery-section" x="350" y="650" width="200" height="80" fill="#fd7e14" opacity="0.7" stroke="#e55a00" stroke-width="3" rx="5"/>
+        <text x="450" y="695" text-anchor="middle" fill="white" font-size="12" font-weight="bold">FRESH BAKERY</text>
         
-        <!-- Household Section -->
-        <rect id="household-section" x="450" y="300" width="300" height="200" fill="#6f42c1" opacity="0.7" stroke="#8e5bba" stroke-width="3" rx="10"/>
-        <text x="600" y="410" text-anchor="middle" fill="white" font-size="18" font-weight="bold">HOUSEHOLD ITEMS</text>
+        <!-- Produce Section (Front Center-Left) -->
+        <rect id="produce-section" x="100" y="500" width="250" height="120" fill="#28a745" opacity="0.7" stroke="#20c997" stroke-width="3" rx="5"/>
+        <text x="225" y="570" text-anchor="middle" fill="white" font-size="14" font-weight="bold">FRESH PRODUCE</text>
+        <text x="225" y="590" text-anchor="middle" fill="white" font-size="11">Fruits & Vegetables</text>
         
-        <!-- Aisles -->
-        <rect x="370" y="50" width="60" height="450" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
-        <text x="400" y="280" text-anchor="middle" fill="#6c757d" font-size="12" transform="rotate(-90, 400, 280)">MAIN AISLE</text>
+        <!-- Deli & Meat Counter (Front Right) -->
+        <rect id="deli-section" x="850" y="500" width="250" height="120" fill="#dc3545" opacity="0.7" stroke="#c02938" stroke-width="3" rx="5"/>
+        <text x="975" y="560" text-anchor="middle" fill="white" font-size="14" font-weight="bold">DELI & MEATS</text>
+        <text x="975" y="580" text-anchor="middle" fill="white" font-size="11">Fresh Cut Daily</text>
+        
+        <!-- Dairy Section (Back Right) -->
+        <rect id="dairy-section" x="950" y="300" width="200" height="150" fill="#6f42c1" opacity="0.7" stroke="#5a2d8c" stroke-width="3" rx="5"/>
+        <text x="1050" y="370" text-anchor="middle" fill="white" font-size="12" font-weight="bold">DAIRY</text>
+        <text x="1050" y="390" text-anchor="middle" fill="white" font-size="11">Milk, Cheese, Yogurt</text>
+        
+        <!-- Frozen Foods (Back Left) -->
+        <rect id="frozen-section" x="50" y="300" width="200" height="150" fill="#007bff" opacity="0.7" stroke="#0056b3" stroke-width="3" rx="5"/>
+        <text x="150" y="370" text-anchor="middle" fill="white" font-size="12" font-weight="bold">FROZEN FOODS</text>
+        <text x="150" y="390" text-anchor="middle" fill="white" font-size="11">Ice Cream & Frozen</text>
+        
+        <!-- Aisle 1: Beverages -->
+        <rect id="beverages-section" x="300" y="400" width="150" height="80" fill="#17a2b8" opacity="0.7" stroke="#117a8b" stroke-width="3" rx="5"/>
+        <text x="375" y="430" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 1</text>
+        <text x="375" y="450" text-anchor="middle" fill="white" font-size="11">BEVERAGES</text>
+        <text x="375" y="465" text-anchor="middle" fill="white" font-size="9">Soda, Juice, Water</text>
+        
+        <!-- Aisle 2: Snacks & Chips -->
+        <rect id="snacks-section" x="480" y="400" width="150" height="80" fill="#fd7e14" opacity="0.7" stroke="#e55a00" stroke-width="3" rx="5"/>
+        <text x="555" y="430" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 2</text>
+        <text x="555" y="450" text-anchor="middle" fill="white" font-size="11">SNACKS</text>
+        <text x="555" y="465" text-anchor="middle" fill="white" font-size="9">Chips, Crackers, Nuts</text>
+        
+        <!-- Aisle 3: Cereal & Breakfast -->
+        <rect id="cereal-section" x="660" y="400" width="150" height="80" fill="#ffc107" opacity="0.7" stroke="#d39e00" stroke-width="3" rx="5"/>
+        <text x="735" y="430" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 3</text>
+        <text x="735" y="450" text-anchor="middle" fill="white" font-size="11">CEREAL</text>
+        <text x="735" y="465" text-anchor="middle" fill="white" font-size="9">Breakfast Items</text>
+        
+        <!-- Aisle 4: Canned Goods -->
+        <rect id="canned-section" x="300" y="250" width="150" height="80" fill="#6c757d" opacity="0.7" stroke="#5a6268" stroke-width="3" rx="5"/>
+        <text x="375" y="280" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 4</text>
+        <text x="375" y="300" text-anchor="middle" fill="white" font-size="11">CANNED GOODS</text>
+        <text x="375" y="315" text-anchor="middle" fill="white" font-size="9">Soup, Sauce, Beans</text>
+        
+        <!-- Aisle 5: Pasta & International -->
+        <rect id="pasta-section" x="480" y="250" width="150" height="80" fill="#e83e8c" opacity="0.7" stroke="#d91a72" stroke-width="3" rx="5"/>
+        <text x="555" y="280" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 5</text>
+        <text x="555" y="300" text-anchor="middle" fill="white" font-size="11">PASTA</text>
+        <text x="555" y="315" text-anchor="middle" fill="white" font-size="9">International Foods</text>
+        
+        <!-- Aisle 6: Baking & Spices -->
+        <rect id="baking-section" x="660" y="250" width="150" height="80" fill="#20c997" opacity="0.7" stroke="#17a085" stroke-width="3" rx="5"/>
+        <text x="735" y="280" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 6</text>
+        <text x="735" y="300" text-anchor="middle" fill="white" font-size="11">BAKING</text>
+        <text x="735" y="315" text-anchor="middle" fill="white" font-size="9">Flour, Sugar, Spices</text>
+        
+        <!-- Aisle 7: Health & Beauty -->
+        <rect id="health-section" x="300" y="100" width="150" height="80" fill="#6f42c1" opacity="0.7" stroke="#5a2d8c" stroke-width="3" rx="5"/>
+        <text x="375" y="130" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 7</text>
+        <text x="375" y="150" text-anchor="middle" fill="white" font-size="11">HEALTH & BEAUTY</text>
+        <text x="375" y="165" text-anchor="middle" fill="white" font-size="9">Personal Care</text>
+        
+        <!-- Aisle 8: Household & Cleaning -->
+        <rect id="household-section" x="480" y="100" width="150" height="80" fill="#dc3545" opacity="0.7" stroke="#c02938" stroke-width="3" rx="5"/>
+        <text x="555" y="130" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AISLE 8</text>
+        <text x="555" y="150" text-anchor="middle" fill="white" font-size="11">HOUSEHOLD</text>
+        <text x="555" y="165" text-anchor="middle" fill="white" font-size="9">Cleaning Supplies</text>
+        
+        <!-- Pet Supplies (Back Center) -->
+        <rect id="pet-section" x="660" y="100" width="150" height="80" fill="#795548" opacity="0.7" stroke="#5d4037" stroke-width="3" rx="5"/>
+        <text x="735" y="130" text-anchor="middle" fill="white" font-size="10" font-weight="bold">PET SUPPLIES</text>
+        <text x="735" y="150" text-anchor="middle" fill="white" font-size="11">Food & Accessories</text>
+        
+        <!-- Horizontal Aisles -->
+        <rect x="280" y="190" width="550" height="30" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        <rect x="280" y="340" width="550" height="30" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        <rect x="280" y="490" width="550" height="30" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        
+        <!-- Vertical Aisles -->
+        <rect x="270" y="90" width="30" height="430" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        <rect x="460" y="90" width="30" height="430" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        <rect x="640" y="90" width="30" height="430" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        <rect x="820" y="90" width="30" height="430" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+        
+        <!-- Direction Arrows for Navigation -->
+        <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#28a745" />
+            </marker>
+        </defs>
+        
+        <!-- Store Labels -->
+        <text x="600" y="30" text-anchor="middle" fill="#343a40" font-size="18" font-weight="bold">SuperMart Central - Complex Layout</text>
+        <text x="50" y="60" fill="#6c757d" font-size="12">← Frozen Foods</text>
+        <text x="1050" y="60" fill="#6c757d" font-size="12">Dairy →</text>
     </svg>'''
     
     # Create sample store
