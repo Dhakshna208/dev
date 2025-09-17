@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
 import axios from "axios";
-import { Search, MapPin, ShoppingCart, Package } from "lucide-react";
+import { Search, MapPin, ShoppingCart, Package, Plus, Minus, Navigation, ArrowRight, ArrowLeft, ArrowUp, Check } from "lucide-react";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
